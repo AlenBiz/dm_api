@@ -28,14 +28,14 @@ def test_post_v1_account():
 
     # получить письма из почтового ящика
     response = mailhog_api.det_api_v2_messages()
-    print('Получние письма')
+    print('Получение письма')
     print(response.status_code)
     print(response.text)
     assert response.status_code == 200, f"Письма не были получены {response.json()}"
 
     # Получить активационный токен
     token = get_token_by_login(login, response)
-    print('получение токена')
+    print('Получение токена')
     print(response.status_code)
     print(response.text)
     assert token is not None, f"Токен для пользователя {login} не был получен"
@@ -58,7 +58,7 @@ def test_post_v1_account():
     }
     response = login_api.post_v1_account_login(json_data=json_data)
     # response = login_api.post_v1_account_login(json_data=json_data)
-    print('авторизация')
+    print('Авторизация')
     print(response.status_code)
     print(response.text)
     print(response.request.body)

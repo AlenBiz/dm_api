@@ -4,13 +4,14 @@ from dm_api_account.apis.login_api import LoginApi
 from api_mailhog.apis.mailhog_api import MailhogApi
 from faker import Faker
 
+
 def test_put_v1_account_token():
     account_api = AccountApi(host='http://5.63.153.31:5051')
     login_api = LoginApi(host='http://5.63.153.31:5051')
     mailhog_api = MailhogApi(host='http://5.63.153.31:5025')
     # Тестовые данные
     fake = Faker()
-    login = fake.last_name()+fake.first_name()
+    login = fake.last_name() + fake.first_name()
     email = f'{login}@mail.ru'
     password = '12345678'
 
@@ -55,7 +56,6 @@ def test_put_v1_account_token():
     response = account_api.put_v1_account_token(token=token)
     print('Активация пользователя')
     assert response.status_code == 200, f"Пользователь {login} не был активирован"
-
 
     # Авторизация
     json_data = {

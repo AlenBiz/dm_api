@@ -7,6 +7,16 @@ from dm_api_account.apis.login_api import LoginApi
 from api_mailhog.apis.mailhog_api import MailhogApi
 from restclient.configuration import Configuration as MailhogConfiguration
 from restclient.configuration import Configuration as DmConfiguration
+from services.api_mailhog import MailHogApiAccount
+from services.dm_api_account import DMApiAccount
+
+from helpers.account_helpers import AccountHelper
+from restclient.configuration import Configuration as MailhogConfiguration
+from restclient.configuration import Configuration as DmConfiguration
+from services.api_mailhog import MailHogApiAccount
+from services.dm_api_account import DMApiAccount
+from faker import Faker
+import structlog
 from faker import Faker
 
 structlog.configure(
@@ -19,10 +29,9 @@ structlog.configure(
 def test_put_v1_account_token():
     mailhog_configuration = MailhogConfiguration(host='http://5.63.153.31:5025')
     dm_configuration = DmConfiguration(host='http://5.63.153.31:5051', disable_log=False)
-
-    account_api = AccountApi(configuration=dm_configuration)
-    login_api = LoginApi(configuration=dm_configuration)
-    mailhog_api = MailhogApi(configuration=mailhog_configuration)
+    account = DMApiAccount(configuration=dm_configuration)
+    mailhog = MailHogApiAccount(configuration=mailhog_configuration)
+    account_helper = AccountHelper(dm_account_api=account, mailhog=mailhog)
     # Тестовые данные
     fake = Faker()
     login = fake.last_name() + fake.first_name()
@@ -35,7 +44,7 @@ def test_put_v1_account_token():
         'email': email,
         'password': password
     }
-    response = account_api.post_v1_account(json_data=json_data)
+    response = account.account_api.post_v1_account(json_data=json_data)
     print('Регистрация нового пользователя')
     print(response.status_code)
     print(response.text)
@@ -47,18 +56,12 @@ def test_put_v1_account_token():
         'password': password,
         'rememberMe': True
     }
-    response = login_api.post_v1_account_login(json_data=json_data)
+    response = account.login_api.post_v1_account_login(json_data=json_data)
     print('Авторизация без активации')
-    print(response.status_code)
-    print(response.text)
-    print(response.request.body)
     assert response.status_code == 403, f"Пользователь {login} авторизировался без активации"
 
     # получить письма из почтового ящика
-    response = mailhog_api.get_api_v2_messages()
-    print('Получение письма')
-    print(response.status_code)
-    print(response.text)
+    response = mailhog.mailhog_api.get_api_v2_messages()
     assert response.status_code == 200, f"Письма не были получены {response.json()}"
 
     # Получить активационный токен
@@ -67,19 +70,11 @@ def test_put_v1_account_token():
     assert token is not None, f"Токен для пользователя {login} не был получен"
 
     # Активация пользователя
-    response = account_api.put_v1_account_token(token=token)
+    response = account.account_api.put_v1_account_token(token=token)
     print('Активация пользователя')
     assert response.status_code == 200, f"Пользователь {login} не был активирован"
 
-    # Авторизация
-    json_data = {
-        'login': login,
-        'password': password,
-        'rememberMe': True
-    }
-    response = login_api.post_v1_account_login(json_data=json_data)
-    print('Авторизация активированным пользователем')
-    assert response.status_code == 200, f"Пользователь {login} не смог авторизоваться"
+    account_helper.user_login_pass(login=login, password=password, rememberMe=True)
 
 
 def get_token_by_login(login, response):

@@ -1,15 +1,21 @@
 import uuid
+
+import curlify2
+from curlify2 import Curlify
 from requests import (session, JSONDecodeError)
 import structlog
+
+from restclient.configuration import Configuration
 
 
 class RestClient:
     def __init__(
             self,
-            host,
-            headers=None):
-        self.host = host
-        self.headers = headers
+            configuration: Configuration
+    ):
+        self.host = configuration.host
+        self.headers = configuration.headers
+        self.disable_log = configuration.disable_log
         self.session = session()
         self.log = structlog.get_logger(__name__).bind(service='api')
 
@@ -50,6 +56,10 @@ class RestClient:
         log = self.log.bind(event_id=str(uuid.uuid4()))
         full_url = self.host + path
 
+        if self.disable_log:
+            rest_response = self.session.request(method=method, url=full_url, **kwargs)
+            return rest_response
+
         log.msg(
             event='Request',
             method=method,
@@ -60,6 +70,8 @@ class RestClient:
             data=kwargs.get('data')
         )
         rest_response = self.session.request(method=method, url=full_url, **kwargs)
+        # curl = curlify2.curlify.to_curl()
+        # print(curl)
 
         log.msg(
             event='Response',

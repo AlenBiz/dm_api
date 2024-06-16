@@ -6,6 +6,7 @@ from dm_api_account.apis.login_api import LoginApi
 from api_mailhog.apis.mailhog_api import MailhogApi
 from faker import Faker
 
+
 def test_put_v1_account_email():
     account_api = AccountApi(host='http://5.63.153.31:5051')
     login_api = LoginApi(host='http://5.63.153.31:5051')
@@ -13,7 +14,7 @@ def test_put_v1_account_email():
 
     # Тестовые данные
     fake = Faker()
-    login = fake.last_name()
+    login = fake.last_name()+fake.first_name()
     email = f'{login}@mail.ru'
     password = '12345678'
     new_email = f'new{email}'
@@ -31,7 +32,7 @@ def test_put_v1_account_email():
     assert response.status_code == 201, f"Пользователь не был создан {response.json()}"
 
     # получить письма из почтового ящика
-    response = mailhog_api.det_api_v2_messages()
+    response = mailhog_api.get_api_v2_messages()
     print('Получение письма')
     print(response.status_code)
     print(response.text)
@@ -40,19 +41,12 @@ def test_put_v1_account_email():
     # Получить активационный токен
     token = get_token_by_login(login, response)
     print('Получение токена')
-    print(response.status_code)
-    print(response.text)
     assert token is not None, f"Токен для пользователя {login} не был получен"
 
     # Активация пользователя
     response = account_api.put_v1_account_token(token=token)
     print('Активация пользователя')
-    print(response.status_code)
-    print(response.text)
-    print(token)
-
     assert response.status_code == 200, f"Пользователь {login} не был активирован"
-
 
     # Авторизация
     json_data = {
@@ -61,12 +55,11 @@ def test_put_v1_account_email():
         'rememberMe': True
     }
     response = login_api.post_v1_account_login(json_data=json_data)
-    # response = login_api.post_v1_account_login(json_data=json_data)
+
     print('Авторизация')
     print(response.status_code)
     print(response.text)
     assert response.status_code == 200, f"Пользователь {login} не смог авторизоваться"
-
 
     # Смена почтового ящика
     json_data = {
@@ -83,18 +76,13 @@ def test_put_v1_account_email():
         'rememberMe': True
     }
     response = login_api.post_v1_account_login(json_data=json_data)
-
     print('Авторизация после смены почтового ящика')
-    print(response.status_code)
-    print(response.text)
     assert response.status_code == 403, f"Пользователь {login} смог авторизоваться, требуется активация"
 
     # Активация пользователя
     response = account_api.put_v1_account_token(token=token)
     print('Активация пользователя')
-    print(response.status_code)
-    print(response.text)
-    print(token)
+    assert response.status_code == 200, f"Пользователь {login} не был активирован"
 
     json_data = {
         'login': login,
@@ -103,15 +91,7 @@ def test_put_v1_account_email():
     }
     response = login_api.post_v1_account_login(json_data=json_data)
     print('Авторизация')
-    print(response.status_code)
-    print(response.text)
     assert response.status_code == 200, f"Пользователь {login} не смог авторизоваться"
-    assert response
-
-
-
-
-
 
 
 def get_token_by_login(login, response):

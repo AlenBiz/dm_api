@@ -10,7 +10,7 @@ def test_put_v1_account_token():
     mailhog_api = MailhogApi(host='http://5.63.153.31:5025')
     # Тестовые данные
     fake = Faker()
-    login = fake.last_name()
+    login = fake.last_name()+fake.first_name()
     email = f'{login}@mail.ru'
     password = '12345678'
 
@@ -40,7 +40,7 @@ def test_put_v1_account_token():
     assert response.status_code == 403, f"Пользователь {login} авторизировался без активации"
 
     # получить письма из почтового ящика
-    response = mailhog_api.det_api_v2_messages()
+    response = mailhog_api.get_api_v2_messages()
     print('Получение письма')
     print(response.status_code)
     print(response.text)
@@ -49,17 +49,11 @@ def test_put_v1_account_token():
     # Получить активационный токен
     token = get_token_by_login(login, response)
     print('Получение токена')
-    print(response.status_code)
-    print(response.text)
     assert token is not None, f"Токен для пользователя {login} не был получен"
 
     # Активация пользователя
     response = account_api.put_v1_account_token(token=token)
     print('Активация пользователя')
-    print(response.status_code)
-    print(response.text)
-    print(token)
-
     assert response.status_code == 200, f"Пользователь {login} не был активирован"
 
 
@@ -71,9 +65,6 @@ def test_put_v1_account_token():
     }
     response = login_api.post_v1_account_login(json_data=json_data)
     print('Авторизация активированным пользователем')
-    print(response.status_code)
-    print(response.text)
-    print(response.request.body)
     assert response.status_code == 200, f"Пользователь {login} не смог авторизоваться"
 
 

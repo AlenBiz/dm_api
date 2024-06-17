@@ -46,8 +46,6 @@ def test_put_v1_account_token():
     }
     response = account.account_api.post_v1_account(json_data=json_data)
     print('Регистрация нового пользователя')
-    print(response.status_code)
-    print(response.text)
     assert response.status_code == 201, f"Пользователь не был создан {response.json()}"
 
     # Авторизация
@@ -56,9 +54,10 @@ def test_put_v1_account_token():
         'password': password,
         'rememberMe': True
     }
-    response = account.login_api.post_v1_account_login(json_data=json_data)
-    print('Авторизация без активации')
-    assert response.status_code == 403, f"Пользователь {login} авторизировался без активации"
+    account_helper.user_login_fail(login=login, password=password, rememberMe=True)
+    # response = account.login_api.post_v1_account_login(json_data=json_data)
+    # print('Авторизация без активации')
+    # assert response.status_code == 403, f"Пользователь {login} авторизировался без активации"
 
     # получить письма из почтового ящика
     response = mailhog.mailhog_api.get_api_v2_messages()

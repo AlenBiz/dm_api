@@ -18,4 +18,3 @@ class MailhogApi(RestClient):
         return response
 
 
-

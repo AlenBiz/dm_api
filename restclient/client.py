@@ -14,10 +14,14 @@ class RestClient:
             configuration: Configuration
     ):
         self.host = configuration.host
-        self.headers = configuration.headers
+        self.set_headers(configuration.headers)
         self.disable_log = configuration.disable_log
         self.session = session()
         self.log = structlog.get_logger(__name__).bind(service='api')
+
+    def set_headers(self, headers):
+        if headers:
+            self.session.headers.update(headers)
 
     def post(
             self,
@@ -70,9 +74,8 @@ class RestClient:
             data=kwargs.get('data')
         )
         rest_response = self.session.request(method=method, url=full_url, **kwargs)
-        # curl = curlify2.curlify.to_curl()
-        # print(curl)
-
+        curl = Curlify(rest_response.request).to_curl()
+        print(curl)
         log.msg(
             event='Response',
             status_code=rest_response.status_code,

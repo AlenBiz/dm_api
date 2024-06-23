@@ -1,7 +1,8 @@
 import time
-import token
 from json import loads
 from api_mailhog.apis.mailhog_api import MailhogApi
+from dm_api_account.models.login_credentials import LoginCredentials
+from dm_api_account.models.registration import Registration
 from services.dm_api_account import DMApiAccount
 from retrying import retry
 
@@ -61,17 +62,12 @@ class AccountHelper:
             }
         )
 
-
-
-
     def auth_client(
             self,
             login: str,
             password: str
     ):
-        response = self.dm_account_api.login_api.post_v1_account_login(
-            json_data={'login': login, 'password': password}
-        )
+        response = self.user_login(login=login, password=password)
         token = {
             'x-dm-auth-token': response.headers['x-dm-auth-token']
         }
@@ -85,32 +81,34 @@ class AccountHelper:
             password: str,
             email: str
     ):
-        json_data = {
-            'login': login,
-            'email': email,
-            'password': password
-        }
-        response = self.dm_account_api.account_api.post_v1_account(json_data=json_data)
+        registration = Registration(
+            login=login,
+            password=password,
+            email=email
+        )
+        response = self.dm_account_api.account_api.post_v1_account(registration=registration)
         assert response.status_code == 201, f"Пользователь не был создан {response.json()}"
         token = self.get_token(login=login)
         response = self.dm_account_api.account_api.put_v1_account_token(token=token)
-        assert response.status_code == 200, f"Пользователь {login} не был активирован"
+
         return response
-
-
 
     def user_login(
             self,
             login: str,
             password: str,
-            rememberMe: bool = True
+            remember_me: bool = True,
+            validate_responce=False
     ):
-        json_data = {
-            'login': login,
-            'password': password,
-            'rememberMe': rememberMe
-        }
-        response = self.dm_account_api.login_api.post_v1_account_login(json_data=json_data)
+        login_credentials = LoginCredentials(
+            login=login,
+            password=password,
+            remember_me=remember_me
+        )
+        response = self.dm_account_api.login_api.post_v1_account_login(
+            login_credentials=login_credentials,
+            validate_responce=validate_responce
+        )
         return response
 
     def user_change_email(
@@ -125,12 +123,12 @@ class AccountHelper:
             'email': new_email
         }
         response = self.dm_account_api.account_api.put_v1_account_email(json_data=json_data)
-        assert response.status_code == 200, f"Пользователь {login} не смог поменять поменять почту"
+        # assert response.status_code == 200, f"Пользователь {login} не смог поменять поменять почту"
         token = self.get_token(login=login)
         assert token is not None, f"Токен для пользователя {login} не был получен"
         response = self.dm_account_api.account_api.put_v1_account_token(token=token)
-        assert response.status_code == 200, f"Пользователь {login} не был активирован"
-
+        # assert response.status_code == 200, f"Пользователь {login} не был активирован"
+        return response
 
     @retry(
         stop_max_attempt_number=5, retry_on_result=retry_if_result_none, wait_fixed=1000

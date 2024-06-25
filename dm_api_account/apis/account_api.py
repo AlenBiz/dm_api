@@ -35,6 +35,7 @@ class AccountApi(RestClient):
 
     def get_v1_account(
             self,
+            validate_response=True,
             **kwargs
     ):
         """Get current user"""
@@ -42,7 +43,8 @@ class AccountApi(RestClient):
             path='/v1/account',
             **kwargs
         )
-        UserDetailsEnvelope(**response.json())
+        if validate_response:
+            return UserDetailsEnvelope(**response.json())
         return response
 
     def put_v1_account_email(

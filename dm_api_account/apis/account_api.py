@@ -1,4 +1,5 @@
 from dm_api_account.models.registration import Registration
+from dm_api_account.models.user_details_envelope import UserDetailsEnvelope
 from dm_api_account.models.user_envelope import UserEnvelope
 from restclient.client import RestClient
 
@@ -18,7 +19,7 @@ class AccountApi(RestClient):
     def put_v1_account_token(
             self,
             token,
-            validate_responce=True
+            validate_response=True
     ):
         """Activate registered user"""
         headers = {
@@ -28,7 +29,7 @@ class AccountApi(RestClient):
             path=f'/v1/account/{token}',
             headers=headers
         )
-        if validate_responce:
+        if validate_response:
             return UserEnvelope(**response.json())
         return response
 
@@ -41,19 +42,20 @@ class AccountApi(RestClient):
             path='/v1/account',
             **kwargs
         )
+        UserDetailsEnvelope(**response.json())
         return response
 
     def put_v1_account_email(
             self,
             json_data,
-            validate_responce=True
+            validate_response=True
     ):
         """Change registered user email"""
         response = self.put(
             path='/v1/account/email',
             json=json_data
         )
-        if validate_responce:
+        if validate_response:
             return UserEnvelope(**response.json())
         return response
 

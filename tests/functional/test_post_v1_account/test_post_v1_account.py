@@ -1,5 +1,11 @@
-from hamcrest import assert_that, has_property, all_of, instance_of, equal_to, has_properties
+import pytest
+from hamcrest import assert_that, has_property, all_of, instance_of, equal_to, has_properties, starts_with
 from datetime import datetime
+
+from chekers.http_chekers import check_status_code_http
+from chekers.post_v1_account import PostV1Account
+from dm_api_account.models.registration import Registration
+from services import dm_api_account
 
 
 def test_post_v1_account(account_helper, prepare_user):
@@ -9,18 +15,21 @@ def test_post_v1_account(account_helper, prepare_user):
 
     account_helper.register_new_user(login=login, password=password, email=email)
     response = account_helper.user_login(login=login, password=password, validate_response=True)
-    assert_that(
-        response, all_of(
-            has_property
-            ('resource', has_property('login', equal_to(login))),
-            has_property('resource', has_property('registration', instance_of(datetime))),
-            has_property('resource', has_properties({
-                'rating': has_properties({
-                    'enabled': equal_to(True),
-                    'quality': equal_to(0),
-                    'quantity': equal_to(0)
-                })
-            }))
-        )
-    )
-    print(response)
+    PostV1Account.check_response_values_post_v1_account(login, response)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

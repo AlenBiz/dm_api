@@ -93,6 +93,21 @@ class AccountHelper:
 
         return response
 
+    def register_new_not_activated_user(
+            self,
+            login: str,
+            password: str,
+            email: str
+    ):
+        registration = Registration(
+            login=login,
+            password=password,
+            email=email
+        )
+        self.dm_account_api.account_api.post_v1_account(registration=registration)
+
+
+
     def user_login(
             self,
             login: str,

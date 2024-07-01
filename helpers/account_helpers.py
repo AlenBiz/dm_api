@@ -1,8 +1,13 @@
 import time
 from json import loads
+
+import allure
+
 from api_mailhog.apis.mailhog_api import MailhogApi
 from dm_api_account.models.login_credentials import LoginCredentials
 from dm_api_account.models.registration import Registration
+from dm_api_account.models.reset_password import ResetPassword
+from dm_api_account.models.change_password import ChangePassword
 from services.dm_api_account import DMApiAccount
 from retrying import retry
 
@@ -44,22 +49,22 @@ class AccountHelper:
     def change_password(self, login: str, email: str, old_password: str, new_password: str):
         token = self.user_login(login=login, password=old_password)
         self.dm_account_api.account_api.post_v1_account_password(
-            json_data={
-                "login": login,
-                "email": email
-            },
+            resetpassword=ResetPassword(
+                login=login,
+                email=email
+            ),
             headers={
                 "x-dm-auth-token": token.headers["x-dm-auth-token"]
             },
         )
         token = self.get_token(login=login, token_type="reset")
         self.dm_account_api.account_api.put_v1_account_password(
-            json_data={
-                "login": login,
-                "oldPassword": old_password,
-                "newPassword": new_password,
-                "token": token
-            }
+            changepassword=ChangePassword(
+                login=login,
+                token=token,
+                old_password=old_password,
+                new_password=new_password
+            )
         )
 
     def auth_client(
@@ -75,6 +80,7 @@ class AccountHelper:
         self.dm_account_api.login_api.set_headers(token)
         assert response.status_code == 200, "Не удалось авторизироваться"
 
+    @allure.step("Регистрация нового пользователя")
     def register_new_user(
             self,
             login: str,
@@ -106,8 +112,7 @@ class AccountHelper:
         )
         self.dm_account_api.account_api.post_v1_account(registration=registration)
 
-
-
+    @allure.step("Аутентификация пользователя")
     def user_login(
             self,
             login: str,
@@ -140,6 +145,7 @@ class AccountHelper:
             'password': password,
             'email': new_email
         }
+        # @allure.step("Смена почтового ящика")
         response = self.dm_account_api.account_api.put_v1_account_email(json_data=json_data)
         # assert response.status_code == 200, f"Пользователь {login} не смог поменять поменять почту"
         token = self.get_token(login=login)

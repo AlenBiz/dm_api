@@ -1,11 +1,13 @@
 import uuid
 
+import allure
 import curlify2
 from curlify2 import Curlify
 from requests import (session, JSONDecodeError)
 import structlog
 
 from restclient.configuration import Configuration
+from restclient.utilities import allure_attach
 
 
 class RestClient:
@@ -51,6 +53,7 @@ class RestClient:
     ):
         return self._send_request(method='DELETE', path=path, **kwargs)
 
+    @allure_attach
     def _send_request(
             self,
             method,
@@ -75,8 +78,7 @@ class RestClient:
             data=kwargs.get('data')
         )
         rest_response = self.session.request(method=method, url=full_url, **kwargs)
-        curl = Curlify(rest_response.request).to_curl()
-        print(curl)
+        # curl = Curlify(rest_response.request).to_curl()
         log.msg(
             event='Response',
             status_code=rest_response.status_code,

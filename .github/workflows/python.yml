@@ -17,14 +17,17 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+
       - name: Run tests
         run: |
           pytest ./tests --alluredir=allure-results --disable-warnings
         continue-on-error: true
+
       - name: Archive allure results
         uses: actions/upload-artifact@v3
         with:
@@ -41,10 +44,10 @@ jobs:
         with:
           distribution: 'microsoft'
           java-version: '17'
-      - run: sudo wget https://github.com/allure-framework/allure2/releases/download/2.29.0/allure-2.29.0.tgz && sudo tar allure-2.29.0.tgz -C /opt/ && sudo ln -s /opt/allure-2.29.0/bin/allure /usr/bin/allure
-      - name: Download
+      - run: sudo wget https://github.com/allure-framework/allure2/releases/download/2.29.0/allure-2.29.0.tgz && sudo tar -xvzf allure-2.29.0.tgz -C /opt/ && sudo ln -s /opt/allure-2.29.0/bin/allure /usr/bin/allure
+      - name: Download allure-results
         uses: actions/download-artifact@v3
-      - run: allure generate -c allure-results -o site
+      - run: allure generate -c allure-results -o _site
       - name: Store report
         uses: actions/upload-artifact@v3
         with:
@@ -60,7 +63,7 @@ jobs:
       - name: Downloads allure results
         uses: actions/download-artifact@v3
       - run: allure open -c allure-results
-        uses: actions/upload-pages-artifact@
+        uses: actions/upload-pages-artifact@2
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1.2.9

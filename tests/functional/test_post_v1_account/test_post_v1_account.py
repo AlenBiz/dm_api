@@ -19,7 +19,7 @@ class TestsPostV1Account:
 
 
 @allure.suite("Тесты на проверку метода POST v1/account")
-@allure.sub_suite("Позитивные тесты")
+@allure.sub_suite("Негативные тесты")
 @pytest.mark.parametrize('login, email, password, status_code, message',
                          [
                              ('AlenBiz', 'biziaeva4y5y@mail.ru', '123456', 400, 'Validation failed'),

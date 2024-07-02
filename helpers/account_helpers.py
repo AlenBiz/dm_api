@@ -46,10 +46,18 @@ class AccountHelper:
         self.dm_account_api = dm_account_api
         self.mailhog = mailhog
 
-    def change_password(self, login: str, email: str, old_password: str, new_password: str):
+    @allure.step("Изменение пароля")
+    def change_password(
+            self,
+            login: str,
+            email: str,
+            remember_me: bool,
+            old_password: str,
+            new_password: str
+    ):
         token = self.user_login(login=login, password=old_password)
         self.dm_account_api.account_api.post_v1_account_password(
-            resetpassword=ResetPassword(
+            reset_password=ResetPassword(
                 login=login,
                 email=email
             ),
@@ -58,15 +66,17 @@ class AccountHelper:
             },
         )
         token = self.get_token(login=login, token_type="reset")
+        print(token)
         self.dm_account_api.account_api.put_v1_account_password(
-            changepassword=ChangePassword(
+            change_password=ChangePassword(
                 login=login,
                 token=token,
-                old_password=old_password,
-                new_password=new_password
+                oldPassword=old_password,
+                newPassword=new_password
             )
         )
 
+    @allure.step("Аутентинфикация пользователя с получением токена")
     def auth_client(
             self,
             login: str,
@@ -134,6 +144,7 @@ class AccountHelper:
             assert response.headers['x-dm-auth-token'], "Токен для пользователя не был получен"
         return response
 
+    @allure.step("Смена почтового ящика")
     def user_change_email(
             self,
             login: str,
@@ -145,7 +156,7 @@ class AccountHelper:
             'password': password,
             'email': new_email
         }
-        # @allure.step("Смена почтового ящика")
+
         response = self.dm_account_api.account_api.put_v1_account_email(json_data=json_data)
         # assert response.status_code == 200, f"Пользователь {login} не смог поменять поменять почту"
         token = self.get_token(login=login)

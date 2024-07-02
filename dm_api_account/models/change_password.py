@@ -4,12 +4,11 @@ from pydantic import BaseModel,  Field, ConfigDict
 
 class ChangePassword(BaseModel):
     model_config = ConfigDict(extra='forbid')
-
     login: str = Field(...)
     token: str = Field(...)
     oldPassword: str = Field(
-        ..., serialization_alias='old_password'
+        ..., alias='oldPassword'
     )
     newPassword: str = Field(
-        ..., serialization_alias='new_password'
+        ..., alias='newPassword'
     )

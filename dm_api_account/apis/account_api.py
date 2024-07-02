@@ -65,7 +65,7 @@ class AccountApi(RestClient):
 
     def post_v1_account_password(
             self,
-            resetpassword: ResetPassword,
+            reset_password: ResetPassword,
             validate_response=True,
             **kwargs,
 
@@ -73,7 +73,7 @@ class AccountApi(RestClient):
         """Reset register user password"""
         response = self.post(
             path='/v1/account/password',
-            json=resetpassword.model_dump(exclude_none=True, by_alias=True),
+            json=reset_password.model_dump(exclude_none=True, by_alias=True),
             **kwargs
         )
         if validate_response:
@@ -82,13 +82,13 @@ class AccountApi(RestClient):
 
     def put_v1_account_password(
             self,
-            changepassword: ChangePassword,
+            change_password: ChangePassword,
             **kwargs
     ):
         """Change register user password"""
         response = self.put(
             path='/v1/account/password',
-            json=changepassword.model_dump(exclude_none=True, by_alias=True),
+            json=change_password.model_dump(exclude_none=True, by_alias=True),
             **kwargs
         )
         UserEnvelope(**response.json())

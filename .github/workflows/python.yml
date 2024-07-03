@@ -62,7 +62,7 @@ jobs:
     steps:
       - name: Downloads allure results
         uses: actions/download-artifact@v3
-      - run: allure open -c allure-results
+      - name: allure open -c allure-results
         uses: actions/upload-pages-artifact@2
       - name: Deploy to GitHub Pages
         id: deployment

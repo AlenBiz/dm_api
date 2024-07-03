@@ -1,0 +1,37 @@
+{
+    "service": "api",
+    "event_id": "363a56ee-3548-41dc-ba52-507b8837f7c7",
+    "method": "POST",
+    "full_url": "http://5.63.153.31:5051/v1/account",
+    "params": null,
+    "headers": null,
+    "json": {
+        "login": "AlenBiz",
+        "password": "12345678",
+        "email": "biziaevmail.ru"
+    },
+    "data": null,
+    "event": "Request"
+}
+curl -X POST -H "User-Agent: python-requests/2.32.3" -H "Accept-Encoding: gzip, deflate" -H "Accept: */*" -H "Connection: keep-alive" -H "Content-Length: 71" -H "Content-Type: application/json" -d '{"login": "AlenBiz", "password": "12345678", "email": "biziaevmail.ru"}' http://5.63.153.31:5051/v1/account
+{
+    "service": "api",
+    "event_id": "363a56ee-3548-41dc-ba52-507b8837f7c7",
+    "status_code": 400,
+    "headers": "{'Content-Type': 'application/json; charset=utf-8', 'Date': 'Mon, 01 Jul 2024 11:10:18 GMT', 'Server': 'Kestrel', 'Transfer-Encoding': 'chunked'}",
+    "json": {
+        "type": "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+        "title": "Validation failed",
+        "status": 400,
+        "traceId": "00-0f4561e90a26272256d8b9ec642ce9d3-f46e7c9e2e3ec1ad-01",
+        "errors": {
+            "Email": [
+                "Invalid"
+            ],
+            "Login": [
+                "Taken"
+            ]
+        }
+    },
+    "event": "Response"
+}
